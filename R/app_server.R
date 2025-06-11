@@ -5,8 +5,60 @@
 #' @import shiny
 #' @noRd
 app_server <- function(input, output, session) {
-  # file size is 5MB by default. This changes it to 30MB
-  # options(shiny.maxRequestSize = 30*1024^2)
+  ## start-2嵌入代码开始，作用：HTTP请求函数
+  url_execute <- function(curl_type, cur_url, cur_data, cur_header){
+    response <- NULL
+    if(curl_type==1){
+      response <- try(GET(cur_url, cur_header), silent = TRUE)
+    }else{
+      response <- try(POST(cur_url, cur_header, body = cur_data, encode = "json"), silent = TRUE)
+    }
+    
+    if (inherits(response, "try-error")) {
+      response <- list(code=-1)
+    } else if (status_code(response) == 200) {
+      response <- fromJSON(content(response, "text", encoding = "UTF-8"))
+    } else {
+      response <- list(code=-1)
+    }
+  }
+  ## end-2嵌入代码开始，作用：HTTP请求函数
+  ServerStatus <- reactiveVal(
+    is_on_shiny_server = !is.na(Sys.getenv("SHINY_SERVER_VERSION", unset = NA))
+  )
+  # init
+  observe({
+    req(ServerStatus$is_on_shiny_server)
+    ## start-3嵌入代码开始，作用：进入/退出HTTP请求记录
+    query <- parseQueryString(session$clientData$url_search)
+    session$userData$id <- query$id
+    session$userData$appName <- query$appName
+    session$userData$token <- query$token
+    headers <- httr::add_headers(`Token`=session$userData$token, `Content-Type`="application/json")
+    connect_req = list(`appName`=session$userData$appName, `action`="connect", `id`=session$userData$id)
+    connect_data <- try(url_execute(2, 'http://10.2.26.152/sqx_fast/app/workstation/shiny-connect-action', toJSON(connect_req, pretty = FALSE,auto_unbox = TRUE), headers), silent = TRUE)
+    if (connect_data$code!=0) {
+      session$close()
+    }
+    ## end-3嵌入代码开始，作用：进入/退出HTTP请求记录
+  })
+  output$conditional_head <- renderUI({
+    if(ServerStatus$is_on_shiny_server){
+      ## start-1嵌入代码开始，作用：异常跳转到预约系统首页
+      tags$head(
+        tags$script(HTML("
+        $(document).on('shiny:disconnected', function(event) {
+          window.location.href = 'http://10.2.26.152/';
+        });
+      "))
+      )
+      ## end-1嵌入代码结束，作用：异常跳转到预约系统首页
+    }else{
+      NULL
+    }
+  })
+  # file size is 5MB by default. This changes it to 300MB
+  options(shiny.maxRequestSize = 300*1024^2)
   options(warn = -1) # turn off warning
   pdf(file = NULL)
 
@@ -96,4 +148,12 @@ app_server <- function(input, output, session) {
     idep_data = idep_data,
     tab = tab
   )
+  session$onSessionEnded(function() {
+    if(req(ServerStatus$is_on_shiny_server)){
+      headers <- add_headers(`Token`=session$userData$token, `Content-Type`="application/json")
+      connect_req_end = list(`appName`=session$userData$appName, `action`="disconnect", `id`=session$userData$id)
+      connect_end_data <- try(url_execute(2, 'http://10.2.26.152/sqx_fast/app/workstation/shiny-connect-action', toJSON(connect_req_end, pretty = FALSE, auto_unbox = TRUE), headers), silent = TRUE)
+    }
+    stopApp()
+  })
 }

@@ -9,7 +9,8 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-
+    useShinyjs(),
+    uiOutput("conditional_head"), ## start-1嵌入代码开始，作用：异常跳转到预约系统首页
     navbarPage(
       "iDEP 2.01",
 
@@ -25,9 +26,7 @@ app_ui <- function(request) {
       mod_08_bicluster_ui(id = "bicluster"),
       mod_09_network_ui(id = "network"),
       mod_10_doc_ui(id = "doc")
-    ),
-    tags$head(includeHTML(app_sys("app/www/google_analytics_GA4.html"))),
-    tags$head(includeHTML(app_sys("app/www/google_analytics_golem.html")))
+    )
   )
 }
 
