@@ -28,6 +28,7 @@ app_server <- function(input, output, session) {
   )
   # init
   observe({
+    print(ServerStatus$is_on_shiny_server)
     req(ServerStatus$is_on_shiny_server)
     ## start-3嵌入代码开始，作用：进入/退出HTTP请求记录
     query <- parseQueryString(session$clientData$url_search)
