@@ -28,7 +28,6 @@ app_server <- function(input, output, session) {
   )
   # init
   observe({
-    print(ServerStatus$is_on_shiny_server)
     req(isolate(ServerStatus$is_on_shiny_server))
     ## start-3嵌入代码开始，作用：进入/退出HTTP请求记录
     query <- parseQueryString(session$clientData$url_search)
@@ -44,7 +43,7 @@ app_server <- function(input, output, session) {
     ## end-3嵌入代码开始，作用：进入/退出HTTP请求记录
   })
   output$conditional_head <- renderUI({
-    if(ServerStatus$is_on_shiny_server){
+    if(isolate(ServerStatus$is_on_shiny_server)){
       ## start-1嵌入代码开始，作用：异常跳转到预约系统首页
       tags$head(
         tags$script(HTML("
