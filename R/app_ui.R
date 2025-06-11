@@ -11,6 +11,16 @@ app_ui <- function(request) {
     # Your application UI logic
     useShinyjs(),
     uiOutput("conditional_head"), ## start-1嵌入代码开始，作用：异常跳转到预约系统首页
+    tags$head(
+      # Embed Google Analytics
+      tags$script(async = NA, src = "https://www.googletagmanager.com/gtag/js?id=G-RWF876HNKW"),
+      tags$script(HTML("
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-RWF876HNKW');
+    "))
+    ),
     navbarPage(
       "iDEP 2.01",
 
