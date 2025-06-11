@@ -23,7 +23,7 @@ app_server <- function(input, output, session) {
     }
   }
   ## end-2嵌入代码开始，作用：HTTP请求函数
-  ServerStatus <- reactiveVal(
+  ServerStatus <- reactiveValues(
     is_on_shiny_server = !is.na(Sys.getenv("SHINY_SERVER_VERSION", unset = NA))
   )
   # init
