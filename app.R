@@ -7,6 +7,7 @@ if(!require("idepGolem")){
 
 if (!require("idepGolem", quietly = TRUE)){
   devtools::install_github("Bees-GO/idepGolem", upgrade = "never", force = TRUE)
+  install.packages(".", repos = NULL, type = "source", upgrade = "never", force = TRUE)
 }
 
 #pkgload::load_all(export_all = FALSE,helpers = FALSE,attach_testthat = FALSE)
